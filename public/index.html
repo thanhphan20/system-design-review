@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>System Design Review</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header>
+    <h1>System Design Review</h1>
+    <nav>
+      <a href="/index.html">New review</a>
+      <a href="/history.html">History</a>
+    </nav>
+  </header>
+
+  <main>
+    <form id="review-form">
+      <section>
+        <h2>Diagram (mermaid)</h2>
+        <textarea id="mermaid-source" rows="14" placeholder="flowchart TD&#10;  Client --> API --> DB"></textarea>
+        <div id="mermaid-preview"></div>
+        <p id="mermaid-error" class="error"></p>
+      </section>
+
+      <section>
+        <h2>Requirements</h2>
+        <label>Expected DAU / QPS
+          <input type="text" id="dau" name="dau" placeholder="e.g. 5M DAU, ~2k req/s peak" />
+        </label>
+        <label>Read:write ratio
+          <input type="text" id="readWriteRatio" name="readWriteRatio" placeholder="e.g. 100:1" />
+        </label>
+        <label>Consistency needs
+          <input type="text" id="consistencyNeeds" name="consistencyNeeds" placeholder="e.g. eventual OK for reads, strong for writes" />
+        </label>
+        <label>Latency SLA
+          <input type="text" id="latencySla" name="latencySla" placeholder="e.g. p99 &lt; 200ms" />
+        </label>
+        <label>Growth targets
+          <input type="text" id="growthTargets" name="growthTargets" placeholder="e.g. 10x in 2 years" />
+        </label>
+        <p id="requirements-error" class="error"></p>
+      </section>
+
+      <button type="submit">Submit for review</button>
+    </form>
+
+    <section id="result" hidden>
+      <h2>Critique</h2>
+      <pre id="critique-text"></pre>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>

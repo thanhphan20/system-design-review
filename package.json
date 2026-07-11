@@ -1,0 +1,29 @@
+{
+  "name": "system-design-review",
+  "version": "0.1.0",
+  "description": "Personal practice tool: submit a mermaid system design + requirements, get a retrieval-grounded critique.",
+  "private": true,
+  "type": "module",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server.js",
+    "dev": "tsx watch src/server.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
+    "better-sqlite3": "^11.7.0",
+    "express": "^4.21.2",
+    "jsdom": "^29.1.1",
+    "mermaid": "^11.16.0",
+    "voyageai": "^0.0.3"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/express": "^4.17.21",
+    "@types/jsdom": "^28.0.3",
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
