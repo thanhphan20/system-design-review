@@ -31,6 +31,5 @@ jobs:
       - name: Build
         run: bun run build
         env:
-          ANTHROPIC_API_KEY: ci-placeholder
-          VOYAGE_API_KEY: ci-placeholder
+          GROQ_API_KEY: ci-placeholder
           TURSO_DATABASE_URL: file:./data/app.db

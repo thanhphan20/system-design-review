@@ -46,7 +46,7 @@ Request:
 Responses:
 - `200` — `{ "critique": string, "sessionId": number }`
 - `400` — `{ "mermaidError"?: string, "requirementsErrors"?: { field: string, message: string }[] }` (mermaid failed to parse, and/or one or more requirements fields are empty)
-- `500` — `{ "error": string }` (e.g. missing `ANTHROPIC_API_KEY`/`VOYAGE_API_KEY`, or an upstream API failure)
+- `500` — `{ "error": string }` (e.g. missing `GROQ_API_KEY`, or an upstream API failure)
 
 ### `GET /api/sessions`
 
@@ -64,16 +64,14 @@ Returns a `SessionDetail`, or `404 { "error": "Session not found" }`:
 
 ## Critique generation pipeline
 
-1. Build a retrieval query from the mermaid source + requirements
-   (`src/lib/review/critique.ts:buildQuery`).
-2. Embed the query (Voyage AI) and retrieve the top-3 most relevant corpus
-   entries above a 0.3 cosine-similarity threshold (`src/lib/corpus/index.ts`).
-   The corpus (`corpus/*.md`) is embedded once, lazily, on first request per
-   process, and held in memory.
-3. Build a prompt embedding the diagram, requirements, and retrieved
-   reference excerpts (`buildPrompt`), and send it to Claude
-   (`claude-sonnet-4-5`, single non-streaming completion).
-4. Persist the resulting session (`src/lib/db/sessions.ts:createSession`).
+1. Load the full reference corpus (`corpus/*.md`, `src/lib/corpus/index.ts`) —
+   it's a handful of hand-curated pattern cards, small enough to include in
+   full on every request rather than doing embedding-based retrieval.
+2. Build a prompt embedding the diagram, requirements, and the full corpus
+   (`src/lib/review/critique.ts:buildPrompt`), and send it to an LLM via
+   Groq's OpenAI-compatible chat completions API (`llama-3.3-70b-versatile`,
+   single non-streaming completion).
+3. Persist the resulting session (`src/lib/db/sessions.ts:createSession`).
 
 ## Non-goals (unchanged from original scope)
 

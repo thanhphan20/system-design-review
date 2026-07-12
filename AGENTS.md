@@ -30,11 +30,12 @@ extensionless).
   install a jsdom shim only for the duration of one call, then restore
   whatever was there before. A permanent shim previously broke `/history`'s
   SSR by leaking a half-real `document` into unrelated page renders.
-- **The corpus embedding index is built lazily, not at startup.** Next.js API
-  routes have no equivalent of Express's `app.listen` startup hook, so
-  `src/lib/corpus/index.ts`'s `retrieveRelevant()` builds the in-memory
-  embedding index on first call (memoized across concurrent callers via
-  `ensureCorpusIndex()`), not eagerly.
+- **The corpus has no embedding/retrieval step.** It's only 3 hand-curated
+  markdown pattern cards (`corpus/*.md`), so `src/lib/corpus/index.ts` just
+  loads and returns all of them on every request — no Voyage/embeddings
+  dependency, no similarity search. If the corpus grows large enough that
+  including it all in every prompt becomes wasteful, that's the point to
+  reintroduce retrieval, not before.
 - **Local dev DB is a `file:` URL, not a real Turso database.** `.env.local`
   points `TURSO_DATABASE_URL` at `file:./data/app.db` so `bun run dev` works
   without a Turso account. Don't assume `TURSO_AUTH_TOKEN` is set locally —

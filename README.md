@@ -2,17 +2,16 @@
 
 A personal practice tool: submit a mermaid system design diagram plus a set of
 requirements (DAU/QPS, read:write ratio, consistency needs, latency SLA, growth
-targets), and get a retrieval-grounded, mentor-style critique. Past sessions
-are saved and browsable.
+targets), and get a mentor-style critique grounded in a small reference corpus.
+Past sessions are saved and browsable.
 
 ## Stack
 
 | Layer      | Choice                                    |
 | ---------- | ------------------------------------------ |
-| Framework  | Next.js 15 (App Router) + TypeScript        |
+| Framework  | Next.js 16 (App Router) + TypeScript        |
 | Database   | Turso (libSQL), via `@libsql/client`        |
-| LLM        | Anthropic Claude (critique generation)      |
-| Embeddings | Voyage AI (corpus retrieval/grounding)      |
+| LLM        | Groq (free tier, OpenAI-compatible API) — critique generation |
 | Diagrams   | `mermaid` (client-side preview + server-side parse validation) |
 | Package manager | Bun (local dev); Vercel builds/runs on Node in production |
 
@@ -34,8 +33,7 @@ Open http://localhost:3000.
 
 | Variable              | Required for            | Notes                                                                 |
 | ---------------------- | ------------------------ | ---------------------------------------------------------------------- |
-| `ANTHROPIC_API_KEY`    | Critique generation      | Anthropic Messages API key.                                            |
-| `VOYAGE_API_KEY`       | Corpus retrieval         | Voyage AI embeddings key.                                              |
+| `GROQ_API_KEY`         | Critique generation      | Free-tier key from [console.groq.com](https://console.groq.com/keys). |
 | `TURSO_DATABASE_URL`   | Session persistence      | Use `file:./data/app.db` for local dev, or a `libsql://...` URL for a real Turso database. |
 | `TURSO_AUTH_TOKEN`     | Session persistence      | Only required for a remote (non-`file:`) Turso database.               |
 
@@ -66,7 +64,7 @@ src/
 ├── components/                # MermaidPreview, RequirementsForm, CritiqueResult
 └── lib/
     ├── db/                    # Turso client + sessions repository
-    ├── corpus/                # loads + embeds the reference corpus (corpus/*.md)
+    ├── corpus/                # loads the reference corpus (corpus/*.md), included in full per request
     ├── review/                # mermaid validation, critique generation
     └── types.ts               # shared Requirements/Session types
 corpus/                        # hand-curated reference "pattern card" markdown

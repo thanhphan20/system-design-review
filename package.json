@@ -13,14 +13,13 @@
     "audit": "bun audit --audit-level=high"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.32.1",
     "@libsql/client": "^0.14.0",
     "jsdom": "^29.1.1",
     "mermaid": "^11.16.0",
     "next": "^16.0.0",
+    "openai": "^4.77.0",
     "react": "^19.2.7",
-    "react-dom": "^19.2.7",
-    "voyageai": "^0.0.3"
+    "react-dom": "^19.2.7"
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "^16.0.0",
