@@ -17,19 +17,21 @@
     "@libsql/client": "^0.14.0",
     "jsdom": "^29.1.1",
     "mermaid": "^11.16.0",
-    "next": "^15.5.20",
+    "next": "^16.0.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "voyageai": "^0.0.3"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.6",
+    "@next/eslint-plugin-next": "^16.0.0",
     "@types/jsdom": "^28.0.3",
     "@types/node": "^22.20.1",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
     "eslint": "^9.39.5",
-    "eslint-config-next": "^15.5.20",
+    "eslint-plugin-react-hooks": "^4.6.2",
     "typescript": "^5.9.3"
   },
   "trustedDependencies": [
