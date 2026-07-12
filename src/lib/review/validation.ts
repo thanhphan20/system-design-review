@@ -1,12 +1,5 @@
-import { ensureMermaidDomShim } from "./mermaidEnv.js";
-
-export interface Requirements {
-  dau: string;
-  readWriteRatio: string;
-  consistencyNeeds: string;
-  latencySla: string;
-  growthTargets: string;
-}
+import { withMermaidDomShim } from "./mermaidEnv";
+import type { Requirements, ValidationError } from "../types";
 
 const REQUIRED_FIELDS: (keyof Requirements)[] = [
   "dau",
@@ -15,11 +8,6 @@ const REQUIRED_FIELDS: (keyof Requirements)[] = [
   "latencySla",
   "growthTargets",
 ];
-
-export interface ValidationError {
-  field: string;
-  message: string;
-}
 
 export function validateRequirements(
   requirements: Partial<Requirements>
@@ -46,17 +34,18 @@ export async function validateMermaidSource(
     return { valid: false, error: "Mermaid source is empty" };
   }
 
-  ensureMermaidDomShim();
-  const mermaid = (await import("mermaid")).default;
-  mermaid.initialize({ startOnLoad: false });
+  return withMermaidDomShim(async () => {
+    const mermaid = (await import("mermaid")).default;
+    mermaid.initialize({ startOnLoad: false });
 
-  try {
-    await mermaid.parse(source);
-    return { valid: true };
-  } catch (err) {
-    return {
-      valid: false,
-      error: err instanceof Error ? err.message : "Failed to parse mermaid diagram",
-    };
-  }
+    try {
+      await mermaid.parse(source);
+      return { valid: true };
+    } catch (err) {
+      return {
+        valid: false,
+        error: err instanceof Error ? err.message : "Failed to parse mermaid diagram",
+      };
+    }
+  });
 }

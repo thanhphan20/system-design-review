@@ -1,11 +1,12 @@
 import { VoyageAIClient } from "voyageai";
-import { loadCorpus, type CorpusEntry } from "./loader.js";
+import { loadCorpus, type CorpusEntry } from "./loader";
 
 interface IndexedEntry extends CorpusEntry {
   embedding: number[];
 }
 
 let index: IndexedEntry[] | null = null;
+let indexPromise: Promise<void> | null = null;
 
 function getClient(): VoyageAIClient {
   const apiKey = process.env.VOYAGE_API_KEY;
@@ -15,7 +16,7 @@ function getClient(): VoyageAIClient {
   return new VoyageAIClient({ apiKey });
 }
 
-/** Embeds the full corpus once and holds it in memory. Call at startup. */
+/** Embeds the full corpus once and holds it in memory. */
 export async function buildCorpusIndex(): Promise<void> {
   const entries = loadCorpus();
   const client = getClient();
@@ -35,6 +36,15 @@ export async function buildCorpusIndex(): Promise<void> {
 
 export function isCorpusIndexed(): boolean {
   return index !== null;
+}
+
+/** Ensures the corpus index is built, memoizing in-flight builds across concurrent callers (relevant for serverless cold starts). */
+async function ensureCorpusIndex(): Promise<void> {
+  if (index) return;
+  if (!indexPromise) {
+    indexPromise = buildCorpusIndex();
+  }
+  await indexPromise;
 }
 
 function cosineSimilarity(a: number[], b: number[]): number {
@@ -61,8 +71,9 @@ export async function retrieveRelevant(
   query: string,
   topK = 3
 ): Promise<RetrievedEntry[]> {
+  await ensureCorpusIndex();
   if (!index) {
-    throw new Error("Corpus index not built yet — call buildCorpusIndex() first");
+    throw new Error("Corpus index not built");
   }
 
   const client = getClient();

@@ -1,6 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { retrieveRelevant, type RetrievedEntry } from "../corpus/index.js";
-import type { Requirements } from "./validation.js";
+import { retrieveRelevant, type RetrievedEntry } from "../corpus/index";
+import type { Requirements } from "../types";
 
 function getAnthropicClient(): Anthropic {
   const apiKey = process.env.ANTHROPIC_API_KEY;
