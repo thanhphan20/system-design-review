@@ -17,14 +17,24 @@ This is the first change in a greenfield project (see proposal.md). A prior scop
 
 ## Decisions
 
-**Stack**: Node.js/TypeScript, a small Express (or equivalent minimal) HTTP server, plain HTML/JS frontend (mermaid.js in-browser for live diagram preview). Chosen for fastest path to a working local tool with a single language across front/back, and mermaid.js is the reference-implementation renderer so preview matches what the review pipeline parses.
+> **Superseded (2026-07-12):** the stack and storage decisions below were the
+> original v1 choices. The project has since migrated to Next.js + Turso to
+> support deployment on Vercel and further scaling — see
+> [SPEC.md](../../../SPEC.md) and [README.md](../../../README.md) for the
+> current architecture. Kept here for historical context; the capability
+> specs in `specs/` describe behavior, which is unchanged by this migration.
+
+**Stack (original v1)**: Node.js/TypeScript, a small Express (or equivalent minimal) HTTP server, plain HTML/JS frontend (mermaid.js in-browser for live diagram preview). Chosen for fastest path to a working local tool with a single language across front/back, and mermaid.js is the reference-implementation renderer so preview matches what the review pipeline parses.
 - *Alternative considered*: a CLI-only tool (paste mermaid + answer prompts in terminal). Rejected because a form + live diagram preview is meaningfully better UX for iterating on a design during practice, and the cost of a thin web UI is low.
+- *Superseded by*: Next.js 15 (App Router), replacing Express entirely — Next.js is Vercel's native framework, so this collapsed frontend and backend into one app with zero custom deploy config. The frontend is React instead of plain HTML/JS.
 
-**Diagram validation**: parse/validate submitted mermaid source server-side using the `mermaid` npm package's own `mermaid.parse()` (auto-detects diagram type), rejecting syntactically invalid diagrams with a clear error rather than sending broken input to the critique step. Since `mermaid.parse()` touches `window`/`document`/`navigator` even when only parsing (no rendering), a minimal `jsdom` shim is installed once at process start to satisfy those references without a real browser.
+**Diagram validation**: parse/validate submitted mermaid source server-side using the `mermaid` npm package's own `mermaid.parse()` (auto-detects diagram type), rejecting syntactically invalid diagrams with a clear error rather than sending broken input to the critique step. Since `mermaid.parse()` touches `window`/`document`/`navigator` even when only parsing (no rendering), a minimal `jsdom` shim is installed to satisfy those references without a real browser.
 - *Alternative considered*: `@mermaid-js/parser`, a standalone DOM-free parser package. Rejected after implementation revealed it only supports `info | packet | pie | architecture | gitGraph | radar` diagrams — none of which are the flowchart/sequence/class/ER diagrams that system design diagrams actually use.
+- *Updated for Next.js*: the shim is now installed and torn down per-call (`withMermaidDomShim()` in `src/lib/review/mermaidEnv.ts`) rather than once at process start. Next.js API routes and SSR page rendering share one Node process, so a permanent shim leaked a half-real DOM into unrelated page renders and broke `/history`'s server-side rendering.
 
-**Storage**: SQLite (via `better-sqlite3`), single local file. Chosen over flat JSON files because session history needs to be listed/queried (revisit past attempts, spot recurring weak spots), and SQLite gives that without running a separate database process — appropriate for a single-user local tool.
+**Storage (original v1)**: SQLite (via `better-sqlite3`), single local file. Chosen over flat JSON files because session history needs to be listed/queried (revisit past attempts, spot recurring weak spots), and SQLite gives that without running a separate database process — appropriate for a single-user local tool.
 - Schema (v1): `sessions(id, created_at, mermaid_source, requirements_json, critique_text)`. No separate requirements/critique tables — v1 has no need to query into their substructure.
+- *Superseded by*: Turso (libSQL, via `@libsql/client`), same schema. Vercel's serverless functions have an ephemeral, read-only filesystem (only `/tmp`, wiped between invocations), so a local SQLite file cannot persist across requests in production. Turso is SQLite-wire-compatible, so the schema and query shapes carried over with minimal changes (queries became `async`).
 
 **Critique generation**: Anthropic Claude (Messages API) generates the freeform critique, given the diagram source, requirements, and retrieved corpus excerpts in the prompt context.
 
